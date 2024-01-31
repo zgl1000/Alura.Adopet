@@ -5,20 +5,24 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Alura.Adopet.Console
+namespace Alura.Adopet.Console.Comandos
 {
     [DocComando(instrucao: "help", documentacao: "adopet help comando que exibe informações de ajuda dos comandos.\n" +
         "adopet help <NOME_COMANDO> para acessar a ajuda de um comando específico.")]
-    internal class Help
+    internal class Help : IComando
     {
         private Dictionary<string, DocComando> docs;
 
         public Help()
         {
-            docs = Assembly.GetExecutingAssembly().GetTypes()
-                        .Where(t => t.GetCustomAttributes<DocComando>().Any())
-                        .Select(t => t.GetCustomAttribute<DocComando>()!)
-                        .ToDictionary(d => d.Instrucao);
+            docs = DocumentacaoSistema.ToDictionary(Assembly.GetExecutingAssembly());
+        }
+
+        public Task ExecutarAsync(string[] args)
+        {
+            this.ExibeDocumentacao(args);
+
+            return Task.CompletedTask;
         }
 
         public void ExibeDocumentacao(string[] comandos)
@@ -27,7 +31,7 @@ namespace Alura.Adopet.Console
             // se não passou mais nenhum argumento mostra help de todos os comandos
             if (comandos.Length == 1)
             {
-                
+
                 System.Console.WriteLine("Adopet (1.0) - Aplicativo de linha de comando (CLI).");
                 System.Console.WriteLine("Realiza a importação em lote de um arquivos de pets.");
                 System.Console.WriteLine("Comando possíveis: ");
@@ -51,7 +55,7 @@ namespace Alura.Adopet.Console
 
                     System.Console.WriteLine(comando.Documentacao);
                 }
-                
+
                 //if (comandoASerExibido.Equals("import"))
                 //{
                 //    System.Console.WriteLine(" adopet import <arquivo> " +
